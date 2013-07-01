@@ -1,0 +1,104 @@
+Class based views
+=================
+
+from django.http import Http404, HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, get_object_or_404
+from polls.models import Poll, Choice
+from django.core.urlresolvers import reverse
+from django.views.generic import TemplateView, ListView, DetailView
+
+    ################################################
+    # Class based views
+    ################################################
+    class TheDetailsTemplateView(TemplateView):
+        template_name = "polls/detail.html"
+
+        def get_context_data(self, **kwargs):
+            context = super(TheDetails, self).get_context_data(**kwargs)
+
+            # 'poll_id' key captured in URL
+            poll = get_object_or_404(Poll, pk=context['poll_id'])
+            context['poll'] = poll
+            return context
+
+    class TheDetails(DetailView):
+        model = Poll
+        template_name = "polls/detail.html"
+
+
+    class IndexView(ListView):
+        template_name = "polls/index.html"
+        context_object_name  = "latest_poll_list"
+
+        def get_queryset(self):
+            return Poll.objects.order_by('-pub_date')[:5]
+
+    class ResultsView(DetailView):
+        model = Poll
+        template_name = "polls/results.html"
+
+Urls
+----
+
+    from django.conf.urls import patterns, url
+    from polls import views
+
+    urlpatterns = patterns('polls.views',
+            url(r'^$', views.IndexView.as_view(), name='index'),
+            url(r'^(?P<pk>\d+)/$', views.TheDetails.as_view(), name='detail'),
+            url(r'^(?P<pk>\d+)/results/$', views.ResultsView.as_view(),
+    name='results'),
+            url(r'^(?P<poll_id>\d+)/vote/$', 'vote', name='vote'),
+    )
+
+Models
+------
+
+    from django.db import models
+    import datetime
+    from django.utils import timezone
+
+    # Create your models here.
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField('date published')
+
+        def __unicode__(self):
+            return self.question
+
+        def was_published_recently(self):
+            return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+
+        was_published_recently.admin_order_field = "pub_date"
+        was_published_recently.boolean = True
+        was_published_recently.short_description = "Published recently?"
+
+
+
+    class Choice(models.Model):
+        poll = models.ForeignKey(Poll)
+        choice_text = models.CharField(max_length=200)
+        votes = models.IntegerField(default=0)
+
+        def __unicode__(self):
+            return self.choice_text
+
+Template
+--------
+
+    <h1>{{ poll.question }}</h1>
+
+    {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p>
+    {% endif %}
+
+    <form action="{% url 'polls:vote' poll.id %}" method="post">
+        {% csrf_token %}
+        {% for choice in poll.choice_set.all %}
+            <input type="radio" name="choice" id="choice{{ forloop.counter }}"
+    value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text
+    }}</label><br />
+        {% endfor %}
+    <input type="submit" value="Vote">
+    </form>

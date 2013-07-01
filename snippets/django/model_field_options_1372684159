@@ -1,0 +1,153 @@
+Model field options
+===================
+
+null
+----
+
+* Default: False
+* If True, empty values stored as NULL in database.
+* Empty strings will always be stored as empty strings.
+    + Only use null=True for non-string fields
+* Differs from `blank`
+    + `null` refers to db representation
+    + `blank` refers to validation
+
+blank
+-----
+
+* Default: False
+* If True, field is allowed to be blank.
+* Differs from `null`
+    + `blank` refers to validation
+    + `null` refers to db representation
+
+choices
+-------
+
+* An iterable of 2-tuples to use as choices for the field.
+* First value of the tuple is actual data-value, second  is human-readable
+* It's a best practice to define choices inside a model class
+    + Allows you to reference the choices outside of the field specification
+
+    class Student(models.Model):
+        FRESHMAN = 'FR'
+        SOPHOMORE = 'SO'
+        JUNIOR = 'JR'
+        SENIOR = 'SR'
+        YEAR_IN_SCHOOL_CHOICES = (
+            (FRESHMAN, 'Freshman'),
+            (SOPHOMORE, 'Sophomore'),
+            (JUNIOR, 'Junior'),
+            (SENIOR, 'Senior'),
+        )
+        year_in_school = models.CharField(max_length=2,
+                                          choices=YEAR_IN_SCHOOL_CHOICES,
+                                          default=FRESHMAN)
+
+        def is_upperclass(self):
+            return self.year_in_school in (self.JUNIOR, self.SENIOR)
+
+db_column
+---------
+
+* Name of the database column to use for the field
+* If not provided, the variable name of the field will be used.
+* Reversed words are ok due to Django escaping in background
+
+db_index
+--------
+
+* If True, a `CREATE INDEX` statement is made for this field
+
+default
+-------
+
+* The default value for the field
+* Can be a value or callable object
+    + If callable, it will be called every time a new object is created
+* The default CANNOT be a mutable object (list, dict, set)
+    + This is because a reference to that mutable object would be used
+    + Changing the object later would change the calling behavior of `default`
+    + Using lambdas:
+
+    contact = JSONField("Contact", default=lambda:{"email": "to1@gmail.com"})
+
+editable
+--------
+
+* Default: True
+* If False, the field will not be displayed in the admin or any other ModelForm.
+
+error_messages
+--------------
+
+* Override the default messages the field will raise.
+* Pass in a dict with keys matching the error messages to be overridden
+* For example, you can override the default messages for a field being blank
+* Error messages key options:
+    + "null"
+    + "blank"
+    + "invalid"
+    + "invalid_choice"
+    + "unique"
+
+help_text
+---------
+
+* Extra help information to be displayed.
+* Useful for documentation even if field isn't on form
+* NOT HTML escaped
+    + Lets you include HTML tags in help text
+    + Be careful!
+* Can escape youreself via `django.utils.html.escape()`
+
+primary_key
+-----------
+
+* If True, this field is the primary key for the model
+* If no primary key is specified, Django automatically adds an AutoField
+    + This means a primary key is not required
+* If True, this implies null=False and unique=True.
+* Only one primary key is allowed on an object
+
+unique
+------
+
+* If True, this field must be unique throughout the table
+* Enforced at database level and by model validation
+    + Attempting to save a model with a duplicate value of a unique field, a
+      `django.db.IntegrityError` will be raised by the `save()` method.
+* Valid on all field types except `ManyToManyField` and `FileField`
+* If `unique=True`, no need to specify `db_index=True`.
+
+unique_for_date
+---------------
+
+* Must be set to the name of a `DateField` or `DateTimeField`
+* Will require the value of this field to be unique for the corresponding
+  DateField`'s value
+* `For example, if you have a field `title` that has
+  `unique_for_date="pub_date"', then Django wouldn’t allow the entry of two
+   records with the same `title` and `pub_date`.'
+
+unique_for_month
+----------------
+
+* Like `unique_for_date`, but requires the field to be unique WRT the month
+
+unique_for_year
+----------------
+
+* Like `unique_for_date`, but requires the field to be unique WRT the year
+
+verbose_name
+------------
+
+* A human-readable name for the field.
+* If not provided, the field's attribute name is used
+    + Underscores are converted to spaces.
+
+validatiors
+-----------
+
+* A list of validators to run for this field

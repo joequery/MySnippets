@@ -1,0 +1,38 @@
+Manage.py Commands
+==================
+
+Starting a Django project
+-------------------------
+
+    $ django-admin.py startproject mysite
+
+
+Running the development server
+------------------------------
+
+    $ python manage.py runserver 0.0.0.0:8000
+
+Sync the database
+-----------------
+
+    $ python manage.py syncdb
+
+Create apps
+-----------
+
+    $ python manage.py startapp myapp
+
+See SQL for unsyncedb model
+---------------------------
+
+    $ python manage.py manage.py sql myapp
+
+Validate models
+---------------
+
+    $ python manage.py validate
+
+Interactive console / shell
+---------------------------
+
+    $ python manage.py shell

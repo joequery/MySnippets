@@ -1,0 +1,121 @@
+Bare bones POST request
+=======================
+
+The models
+----------
+
+    from django.db import models
+    import datetime
+    from django.utils import timezone
+
+    # Create your models here.
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField('date published')
+
+        def __unicode__(self):
+            return self.question
+
+        def was_published_recently(self):
+            return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+
+        was_published_recently.admin_order_field = "pub_date"
+        was_published_recently.boolean = True
+        was_published_recently.short_description = "Published recently?"
+
+
+
+    class Choice(models.Model):
+        poll = models.ForeignKey(Poll)
+        choice_text = models.CharField(max_length=200)
+        votes = models.IntegerField(default=0)
+
+        def __unicode__(self):
+            return self.choice_text
+
+The view
+--------
+
+    from django.http import Http404, HttpResponseRedirect, HttpResponse
+    from django.shortcuts import render, get_object_or_404
+    from polls.models import Poll, Choice
+    from django.core.urlresolvers import reverse
+
+    def index(request):
+        latest_poll_list = Poll.objects.order_by("pub_date")[:5]
+        context = { "latest_poll_list":latest_poll_list, }
+        return render(request, 'polls/index.html', context)
+
+    def detail(request, poll_id):
+        poll = get_object_or_404(Poll, pk=poll_id)
+        return render(request, "polls/detail.html", {"poll": poll})
+
+    def results(request, poll_id):
+        poll = get_object_or_404(Poll, pk=poll_id)
+        return render(request, "polls/results.html", {'poll':poll})
+
+    def vote(request, poll_id):
+        p = get_object_or_404(Poll, pk=poll_id)
+        try:
+            selected_choice = p.choice_set.get(pk=request.POST['choice'])
+        except (KeyError, Choice.DoesNotExist):
+            # Redisplay the poll voting form
+            return render(request, 'polls/detail.html',{
+                'poll':p,
+                'error_message': "You didn't select a choice"
+            })
+        else:
+            selected_choice.votes += 1
+            selected_choice.save()
+            # Always return an HttpResponseRedirect after successfuly dealing with
+            # POST data
+            return HttpResponseRedirect(reverse('polls:results', args=(p.id,)))
+
+The template
+------------
+
+    <h1>{{ poll.question }}</h1>
+
+    {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p>
+    {% endif %}
+
+    <form action="{% url 'polls:vote' poll.id %}" method="post">
+        {% csrf_token %}
+        {% for choice in poll.choice_set.all %}
+            <input type="radio" name="choice" id="choice{{ forloop.counter }}"
+    value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text
+    }}</label><br />
+        {% endfor %}
+    <input type="submit" value="Vote">
+    </form>
+
+
+The project urls
+----------------
+
+    from django.conf.urls import patterns, include, url
+
+    # Uncomment the next two lines to enable the admin:
+    from django.contrib import admin
+    admin.autodiscover()
+
+    urlpatterns = patterns('',
+        url(r'^admin/', include(admin.site.urls)),
+        url(r'^polls/', include('polls.urls', namespace="polls")),
+    )
+
+The app urls
+------------
+
+    from django.conf.urls import patterns, url
+    from polls import views
+
+    urlpatterns = patterns('polls.views',
+            url(r'^$', 'index', name='index'),
+            url(r'^(?P<poll_id>\d+)/$', 'detail', name='detail'),
+            url(r'^(?P<poll_id>\d+)/results/$', 'results', name='results'),
+            url(r'^(?P<poll_id>\d+)/vote/$', 'vote', name='vote'),
+    )
+

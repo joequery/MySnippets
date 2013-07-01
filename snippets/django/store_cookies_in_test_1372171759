@@ -1,0 +1,13 @@
+Storing cookies in Django tests
+===============================
+
+Luckily, the django Client() stores cookies automatically! No need to pass
+around cookies manually or create sessions (like with Requests)
+
+    >>> from django.test.client import Client
+    >>> c = Client()
+    >>> r = c.post('/login', {"username":"someuser", "password":"somepassword"})
+    >>> 
+    >>> # c now has cookies! Now we can visit things logged in users are allowed to see.
+    >>> r = c.get("/some-user-only-page")
+    >>> r.content

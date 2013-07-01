@@ -1,0 +1,103 @@
+URL Conf
+========
+
+urls.py
+
+Basic
+-----
+
+    from django.conf.urls import patterns, url
+
+    urlpatterns = patterns('',
+        url(r'^articles/2003/$', 'news.views.special_case_2003'),
+        url(r'^articles/(\d{4})/$', 'news.views.year_archive'),
+        url(r'^articles/(\d{4})/(\d{2})/$', 'news.views.month_archive'),
+        url(r'^articles/(\d{4})/(\d{2})/(\d+)/$', 'news.views.article_detail'),
+    )
+
+
+Named groups
+------------
+
+    from django.conf.urls import patterns, url
+
+    urlpatterns = patterns('',
+        url(r'^articles/2003/$', 'news.views.special_case_2003'),
+        url(r'^articles/(?P<year>\d{4})/$', 'news.views.year_archive'),
+        url(r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/$', 'news.views.month_archive'),
+        url(r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$', 'news.views.article_detail'),
+    )
+
+A request to /articles/2003/03/03/ would call the function 
+
+    news.views.article_detail(request, year='2003', month='03', day='03').
+
+
+Using default values
+--------------------
+
+    from django.conf.urls import patterns, url
+
+    urlpatterns = patterns('',
+        url(r'^blog/$', 'blog.views.page'),
+        url(r'^blog/page(?P<num>\d+)/$', 'blog.views.page'),
+    )
+
+    # View (in blog/views.py)
+    def page(request, num="1"):
+        # Output the appropriate page of blog entries, according to num.
+        ...
+
+View prefix
+-----------
+
+    urlpatterns = patterns('',
+        url(r'^articles/(\d{4})/$', 'news.views.year_archive'),
+        url(r'^articles/(\d{4})/(\d{2})/$', 'news.views.month_archive'),
+        url(r'^articles/(\d{4})/(\d{2})/(\d+)/$', 'news.views.article_detail'),
+    )
+
+Can be expressed as
+
+    urlpatterns = patterns('news.views',
+        url(r'^articles/(\d{4})/$', 'year_archive'),
+        url(r'^articles/(\d{4})/(\d{2})/$', 'month_archive'),
+        url(r'^articles/(\d{4})/(\d{2})/(\d+)/$', 'article_detail'),
+    )
+
+What if I don't have a 100% in-common prefix?
+---------------------------------------------
+
+Use multiple view prefixes by adding the patterns.
+
+    from django.conf.urls import patterns, url
+
+    urlpatterns = patterns('myapp.views',
+        url(r'^$', 'app_index'),
+        url(r'^(?P<year>\d{4})/(?P<month>[a-z]{3})/$','month_display'),
+    )
+
+    urlpatterns += patterns('weblog.views',
+        url(r'^tag/(?P<tag>\w+)/$', 'tag'),
+    )
+
+Includes
+--------
+
+*NOTE: Lack of $ sign at the end of expressions*
+
+    from django.conf.urls import include, patterns, url
+
+    extra_patterns = patterns('',
+        url(r'^reports/(?P<id>\d+)/$', 'credit.views.report'),
+        url(r'^charge/$', 'credit.views.charge'),
+    )
+
+    urlpatterns = patterns('',
+        url(r'^$', 'apps.main.views.homepage'),
+        url(r'^help/', include('apps.help.urls')),
+        url(r'^credit/', include(extra_patterns)),
+    )
+
+
+*NOTE: An included URLconf receives any captured params from parent URLconfs*

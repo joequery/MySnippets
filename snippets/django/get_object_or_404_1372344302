@@ -1,0 +1,30 @@
+get_object_or_404
+=================
+
+get_object_or_404(klass, *args, **kwargs)
+Calls get() on a given model manager, but it raises Http404 instead of the model’s DoesNotExist exception.
+
+Required arguments
+klass
+A Model, Manager or QuerySet instance from which to get the object.
+**kwargs
+Lookup parameters, which should be in the format accepted by get() and filter().
+Example
+The following example gets the object with the primary key of 1 from MyModel:
+
+    from django.shortcuts import get_object_or_404
+
+    def my_view(request):
+        my_object = get_object_or_404(MyModel, pk=1)
+
+This example is equivalent to:
+
+    from django.http import Http404
+
+    def my_view(request):
+        try:
+            my_object = MyModel.objects.get(pk=1)
+        except MyModel.DoesNotExist:
+            raise Http404
+
+Note: As with get(), a MultipleObjectsReturned exception will be raised if more than one object is found.
