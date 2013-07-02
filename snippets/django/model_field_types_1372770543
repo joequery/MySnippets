@@ -1,0 +1,228 @@
+Model field types
+=================
+
+NOTE: Some field types have options specific to those types. However, all
+options in the `Model field options` document will still apply.
+
+AutoField
+---------
+
+    class AutoField(**options)
+
+* An IntegerField that automatically increments according to available IDs. 
+* You usually won’t need to use this directly
+
+BigIntegerField
+---------------
+
+    class BigIntegerField([**options])
+
+* A 64 bit integer
+* Much like an IntegerField except that it is guaranteed to fit numbers from
+  -9223372036854775808 to 9223372036854775807. 
+* The default form widget for this field is a TextInput.
+
+BooleanField
+------------
+
+    class BooleanField(**options)
+
+* A true/false field.
+* The default form widget for this field is a CheckboxInput.
+* If you need to accept null values use NullBooleanField instead.
+
+CharField
+---------
+
+    class CharField(max_length=None[, **options])
+
+* A string field, for small- to large-sized strings.
+* For large amounts of text, use TextField.
+* The default form widget for this field is a TextInput.
+* CharField.max_length (required)
+    + The maximum length (in characters) of the field. 
+    + The max_length is enforced at the database level and in Django’s validation.
+
+CommaSeparatedIntegerField
+--------------------------
+
+    class CommaSeparatedIntegerField(max_length=None[, **options])
+
+* A field of integers separated by commas. 
+* As in CharField, the max_length argument is required
+
+DateField
+---------
+
+    class DateField([auto_now=False, auto_now_add=False, **options])
+
+* A date, represented in Python by a `datetime.date` instance.
+* DateField.auto_now (optional)
+    + Automatically set the field to now every time the object is saved. 
+    + Useful for “last-modified” timestamps. 
+    + The current date is always used; it cannot be overridden
+* DateField.auto_now_add (optonal)
+    + Automatically set the field to now when the object is first created. 
+    + Useful for "creation-of" timestamps. 
+    + The current date is always used; it cannot be overridden
+* The default form widget for this field is a TextInput. 
+    + The admin adds a JavaScript calendar, and a shortcut for “Today”. 
+    + Includes an additional invalid_date error message key.
+* As currently implemented, setting auto_now or auto_now_add to True will cause the field to have editable=False and blank=True set.
+
+DateTimeField
+-------------
+
+    class DateTimeField([auto_now=False, auto_now_add=False, **options])
+
+* A date and time, represented in Python by a `datetime.datetime` instance. 
+* Takes the same extra arguments as DateField.
+* The default form widget for this field is a single TextInput. 
+    + The admin uses two separate TextInput widgets with JavaScript shortcuts.
+
+DecimalField
+------------
+
+    class DecimalField(max_digits=None, decimal_places=None[, **options])
+
+* A fixed-precision decimal number, represented in Python by a `Decimal` instance. 
+* DecimalField.max_digits (required)
+    + The maximum number of digits allowed in the number. 
+    + This number must be >= to decimal_places.
+* DecimalField.decimal_places (required)
+    + The number of decimal places to store with the number.
+    + For example, to store numbers up to 999 with a resolution of 2 decimal places
+
+        models.DecimalField(..., max_digits=5, decimal_places=2)
+
+* The default form widget for this field is a TextInput.
+* DecimalField vs FloatField => Decimal() vs float type
+
+EmailField
+----------
+
+    class EmailField([max_length=75, **options])
+
+* A CharField that checks that the value is a valid email address.
+
+FloatField
+----------
+
+    class FloatField([**options])
+
+* A floating-point number represented in Python by a float instance.
+* The default form widget for this field is a TextInput.
+
+IntegerField
+------------
+
+    class IntegerField([**options])
+
+* An integer. 
+* The default form widget for this field is a TextInput.
+
+IPAddressField
+--------------
+
+    class IPAddressField([**options])
+
+* An IP address, in string format (e.g. “192.0.2.30”). 
+* The default form widget for this field is a TextInput.
+
+GenericIPAddressField
+---------------------
+
+    class GenericIPAddressField([protocol=both, unpack_ipv4=False, **options])
+
+* An IPv4 or IPv6 address, in string format (e.g. 192.0.2.30 or 2a02:42fe::4). 
+* The default form widget for this field is a TextInput.
+* The IPv6 address normalization follows RFC 4291 section 2.2
+    + 2001:0::0:01 would be normalized to 2001::1
+    + ::ffff:0a0a:0a0a would be normalized to ::ffff:10.10.10.10. 
+    + All characters are converted to lowercase.
+* GenericIPAddressField.protocol (optional)
+    + Limits valid inputs to the specified protocol. 
+    + Accepted values are (case insensitive)
+        - 'both' (default)
+        - 'IPv4'
+        - 'IPv6'
+* GenericIPAddressField.unpack_ipv4 (optional)
+    + Unpacks IPv4 mapped addresses 
+    + Default is disabled. 
+    + If this option is enabled, ::ffff:192.0.2.1 would be unpacked to 192.0.2.1. 
+    + Can only be used when protocol is set to 'both'.
+
+NullBooleanField
+----------------
+
+    class NullBooleanField([**options])
+
+* Like a BooleanField, but allows NULL as one of the options. 
+* Use this instead of a BooleanField with null=True. 
+* The default form widget for this field is a NullBooleanSelect.
+
+PositiveIntegerField
+--------------------
+
+    class PositiveIntegerField([**options])
+
+* Like an IntegerField, but must be either positive or zero (0). 
+* The value 0 is accepted for backward compatibility reasons.
+
+PositiveSmallIntegerField
+-------------------------
+
+    class PositiveSmallIntegerField([**options])
+
+* Like a PositiveIntegerField, but only allows values under a certain (database-dependent) point. 
+* Values up to 32767 are safe in all databases supported by Django.
+
+SlugField
+---------
+
+    class SlugField([max_length=50, **options])
+
+* A slug is a short label for something containing only 
+    + letters
+    + numbers
+    + underscores
+    + hyphens 
+* Like a CharField, you can specify max_length. Default is 50
+* IMPORTANT: Implies setting Field.db_index to True.
+* It is often useful to automatically prepopulate a SlugField based on the value of some other value. 
+    + You can do this automatically in the admin using prepopulated_fields.
+    + https://docs.djangoproject.com/en/dev/ref/contrib/admin/#django.contrib.admin.ModelAdmin.prepopulated_fields
+
+SmallIntegerField
+-----------------
+
+    class SmallIntegerField([**options])
+
+* Like an IntegerField, but only allows values under a certain (database-dependent) point. 
+* Values from -32768 to 32767 are safe in all databases supported by Django.
+
+TextField
+---------
+
+    class TextField([**options])
+
+A large text field. The default form widget for this field is a Textarea.
+
+TimeField
+---------
+
+    class TimeField([auto_now=False, auto_now_add=False, **options])
+
+* A time, represented in Python by a datetime.time instance. 
+* Accepts the same auto-population options as DateField.
+* The default form widget for this field is a TextInput. The admin adds some JavaScript shortcuts.
+
+URLField
+--------
+
+    class URLField([max_length=200, **options])
+
+* A CharField for a URL.
+* The default form widget for this field is a TextInput.
+* Like CharField, URLField takes the optional max_length argument. Default is 200
+* The current value of the field will be displayed as a clickable link above the input widget.

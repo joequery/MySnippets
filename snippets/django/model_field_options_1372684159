@@ -1,17 +1,6 @@
 Model field options
 ===================
 
-null
-----
-
-* Default: False
-* If True, empty values stored as NULL in database.
-* Empty strings will always be stored as empty strings.
-    + Only use null=True for non-string fields
-* Differs from `blank`
-    + `null` refers to db representation
-    + `blank` refers to validation
-
 blank
 -----
 
@@ -101,6 +90,17 @@ help_text
     + Be careful!
 * Can escape youreself via `django.utils.html.escape()`
 
+null
+----
+
+* Default: False
+* If True, empty values stored as NULL in database.
+* Empty strings will always be stored as empty strings.
+    + Only use null=True for non-string fields
+* Differs from `blank`
+    + `null` refers to db representation
+    + `blank` refers to validation
+
 primary_key
 -----------
 
@@ -129,6 +129,7 @@ unique_for_date
 * `For example, if you have a field `title` that has
   `unique_for_date="pub_date"', then Django wouldn’t allow the entry of two
    records with the same `title` and `pub_date`.'
+* Enforced at the model validation layer, NOT THE DATABASE LAYER!!!
 
 unique_for_month
 ----------------
