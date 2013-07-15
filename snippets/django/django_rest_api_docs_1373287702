@@ -1,0 +1,28 @@
+Django REST API Docs
+====================
+
+Github
+------
+
+https://github.com/marcgibbons/django-rest-framework-docs
+
+Pip installation
+----------------
+
+    $ pip install django-rest-framework-docs
+
+Instructions
+------------
+
+Add "rest_framework_docs" to your INSTALLED_APPS setting like this:
+
+    INSTALLED_APPS = (
+        ...
+        'rest_framework_docs',
+    )
+
+Paste the following into your URLconf
+
+        url(r'^rest-api/', include('rest_framework_docs.urls')),
+
+View /rest-api/ to see your Django Rest Framework endpoints

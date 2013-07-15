@@ -1,0 +1,12 @@
+Pip install git repo
+====================
+
+Getting the master branch
+-------------------------
+
+    $ git+git://github.com/user/repo.git
+
+Getting a specific commit
+-------------------------
+
+    $ pip install git+git://github.com/user/repo.git@commithash
