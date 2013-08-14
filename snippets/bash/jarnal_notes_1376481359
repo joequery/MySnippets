@@ -1,0 +1,6 @@
+# notes_jan_14_2013.jaj
+date +"notes_%b_%d_%Y.jaj" | tr '[:upper:]' '[:lower:]'
+
+# jarnal executable command
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+java -Xms64m -Xmx512m -jar $DIR/jarnalDir/jarnal.jar $1 & >/dev/null 2>&1
