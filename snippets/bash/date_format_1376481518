@@ -1,0 +1,2 @@
+# See http://www.cyberciti.biz/faq/linux-unix-formatting-dates-for-display/
+date +"notes_%b_%d_%Y.jaj" | tr '[:upper:]' '[:lower:]'
